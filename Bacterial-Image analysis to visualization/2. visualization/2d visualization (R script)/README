@@ -1,0 +1,92 @@
+Unified ggplot2-based subgroup visualization for multi-strain HTS datasets
+
+This R script generates 2D Z-value subgroup visualizations from a multi-sheet HTS Excel dataset.
+It supports multiple bacterial strains (A. baumannii, S. aureus, PAO1) and automatically applies strain-specific Z-limits, subgroup intervals, and x/y-axis ranges.
+
+The pipeline exports subgroup-specific transparent PNGs, which are used to visualize the structural distribution of samples in X–Y space conditioned on Z-value ranges.
+
+1. Purpose
+This script is intended to:
+Load HTS Excel files containing X, Y, Z measurements
+Split Z-values into subgroups (bins) according to strain-specific rules
+Visualize subgroup-conditioned distributions in 2D (X vs. Y)
+Apply unified styling across multiple strains and antibiotic conditions
+Export each subgroup as a separate transparent PNG file
+
+2. Input Requirements
+Input file format
+The script expects a multi-sheet Excel file (.xlsx) where:
+Each sheet corresponds to a concentration group (_IC50, _MIC, _9xMIC)
+
+Each sheet must contain columns:
+X value, Y value, Z value 
+Rows containing NA or missing numeric values are removed.
+
+Data origin
+The script presumes that X/Y/Z values come from upstream image analysis (BF + PI preprocessing macro pipelines).
+
+
+3. Strain-Specific Configuration
+
+The script defines Z-limits, subgroup steps, and XY-axis bounds for each strain:
+
+strain_config <- list(
+  Ab = list(z_lim = 95, subgroup_step = 10, x_lim = c(0,140), y_lim = c(0,140)),
+  SA = list(z_lim = 78, subgroup_step = 10, x_lim = c(0,55),  y_lim = c(0,260)),
+  PAO1 = list(z_lim = 160, subgroup_step = 20, x_lim = c(0,140), y_lim = c(0,140))
+)
+
+(# NOTE: values presumably correspond to each strain’s dynamic Z range,
+but no biological explanation is provided in the code.)
+
+4. Visualization Logic
+- Z-subgroup partitioning
+  Z-values are divided into two major groups:
+    Group 1: Z ≤ z_lim
+    Uses manually assigned colors per subgroup
+    Opacity varies with subgroup index
+    Group 2: Z > z_lim
+    Uses gradient colors via colorRampPalette()
+    Represents high-Z outlier region
+
+- Shape coding
+  Indicates antibiotic concentration levels:IC50, MIC, 9xMIC
+
+
+5. How to Run
+1) Set paths
+  setwd("PATH/TO/YOUR/OUTPUT_FOLDER")
+  file_path <- "PATH/TO/YOUR/EXCEL_FILE.xlsx"
+
+2) Select strain
+  strain <- "Ab" 
+  # Options: "Ab", "SA", "PAO1"
+
+3) Run the script
+  Simply execute the entire script in R or RStudio:
+  source("zplot_main.R")
+  All subgroup figures will be generated automatically.
+
+6. Output Description
+The script generates:
+One PNG per Z-subgroup per concentration group (IC50 / MIC / 9xMIC)
+Consistent axis scaling per strain
+Color-coded clusters representing Z-range thresholds
+
+Output example filenames:
+Ab_IC50_group1_[subgroup].png
+Ab_MIC_group2_[subgroup].png
+PAO1_9xMIC_group1_[subgroup].png
+
+7. Code Structure Overview
+  1) User settings (paths, strain selection)
+  2) Strain configuration table
+  3) Multi-sheet Excel loading
+  4) Z-subgroup rule generation
+  5) Plotting function
+  6) Loop through IC50/MIC/9xMIC
+
+8. Citation
+If this script contributes to a publication:
+2D Z-value subgroup visualization was performed using a custom R pipeline 
+(ggplot2-based) written by Sujin Kim.
