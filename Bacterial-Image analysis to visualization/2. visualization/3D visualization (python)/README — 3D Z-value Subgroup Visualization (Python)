@@ -1,0 +1,134 @@
+3D Z-value Subgroup Visualization Pipeline (Python)
+Unified Plotly-based 3D visualization for multi-strain HTS X,Y/Z value
+This Python script generates 3D Z-value subgroup visualizations from multi-sheet HTS Excel files.
+It supports different bacterial strains and antibiotic groups by using a unified configuration table that controls axis limits, Z-thresholds, subgroup binning rules, and tick intervals.
+The script outputs an interactive 3D HTML visualization showing raw and averaged X/Y/Z relationships for each antibiotic concentration group (IC50, MIC, 9×MIC).
+
+
+ 1. Purpose
+The primary goals of this script are:
+Load multi-sheet Excel HTS datasets containing X, Y, Z values
+Select visualization settings based on strain × antibiotic type
+Map Z-values into subgroup color schemes
+Visualize both raw points and mean trajectories across IC50 → MIC → 9×MIC
+Export interactive HTML files for rotation, zooming, and inspection
+This corresponds to the 3D visualization layer of the overall HTS pipeline.
+
+
+2. Input Requirements
+Excel file structure
+The script expects an .xlsx file where each sheet name encodes an antibiotic concentration level:
+*_IC50
+*_MIC
+*_9xMIC
+
+Each sheet must contain numeric columns:
+X value
+Y value
+Z value
+Rows containing NA or non-numeric values are automatically removed.
+
+Source of X, Y, Z
+X, Z originate from BF preprocessing macro
+Y originates from PI preprocessing macro
+
+Combined in Excel before visualization
+
+(# NOTE: The script assumes the Excel file already contains merged X/Y/Z values.)
+
+
+3. Strain & Antibiotic Configuration
+Visualization parameters are determined by:
+Bacterial strain
+Antibiotic class (non β-lactam / β-lactam / all)
+
+Configuration includes:
+Parameter	Meaning
+
+z_lim	Threshold separating group1 vs group2 coloring
+index_mode	Rule for computing group1 color-bin index (ab, pa, sa)
+bin_size	Width of color bin
+axis_xy	X/Y axis range
+axis_z	Z-axis range
+tick_xy	Tick spacing for X/Y
+tick_z	Tick spacing for Z
+
+Example (A. baumannii single antibiotics):
+"AB_single": {
+    "non_beta": { z_lim=95, axis_z=180, ... },
+    "beta":     { z_lim=95, axis_z=200, ... }
+}
+
+
+4. Visualization Logic
+
+- Color mapping
+  Z-values are divided into two major classes:
+    Group 1 (Z ≤ z_lim): discrete palette
+    Defined color steps capturing structured Z progression.
+    Group 2 (Z > z_lim): gradient palette
+    Continuous color map for high-Z outliers or resistant clusters.
+
+- Markers
+  Marker shapes encode concentration groups:
+    Shape Group	Plot Symbol
+    IC50	circle
+    MIC	x
+    9×MIC	square
+
+- Displayed data
+
+The script shows:
+Raw X/Y/Z data (low opacity)
+Mean X/Y/Z points for each sheet
+The average trajectory IC50 → MIC → 9xMIC
+
+(No statistical modeling is performed; purely geometric visualization.)
+
+
+5. How to Run
+
+Step 1 – Install required packages
+  pip install pandas numpy plotly matplotlib
+
+Step 2 – Set file path and parameters
+  Inside Python:
+  plot_3d_hts(
+      file_path="PATH/TO/YOUR/EXCEL_FILE.xlsx",
+      strain="AB_single",   # AB_single, AB_combi, PAO1, SA
+      antibiotic="amk"      # any supported antibiotic key
+  )
+
+Step 3 – Run the script
+The script generates an HTML file:
+YOUR_EXCEL_FILE.html
+This file can be opened in any browser for interactive 3D inspection.
+
+
+6. Output
+
+The script creates an interactive 3D HTML visualization with:
+Raw X/Y/Z points
+Mean X/Y/Z per concentration group
+Subgroup-colored Z-values
+Axis ranges scaled per strain × antibiotic class
+Standardized Plotly cube layout
+Example output filename:
+Ab_Amk_3D_Zplot.html
+(# NOTE: Actual filename = Excel filename + “.html”)
+
+
+7. Code Structure Overview
+1) Antibiotic → group mapping
+2) Strain × antibiotic visualization configuration
+3) Config selector
+4) Excel loader
+5) Group1/group2 color logic
+6) 3D visualization function
+
+
+8. Citation
+
+If this script contributed to a publication:
+3D Z-value subgroup visualization was performed using a custom Python pipeline 
+(Plotly-based) developed by Sujin Kim.
