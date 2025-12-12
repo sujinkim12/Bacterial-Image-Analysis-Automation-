@@ -1,2 +1,3 @@
-# Bacterial-Image-Analysis-Automation-
-(*가제)를 위한 자동 이미지 분석 및 시각화 파일입니다.
+Bacterial Image Analysis & Visualization Pipeline
+This repository contains ImageJ preprocessing macros (BF/PI), R-based 2D Z-value subgroup visualization, and Python 3D HTS visualization scripts used in the analysis of bacterial imaging datasets for the above manuscript.
+The codebase supports multi-strain datasets (A. baumannii, PAO1, S. aureus) and HTS concentration groups (IC50 / MIC / 9×MIC).
