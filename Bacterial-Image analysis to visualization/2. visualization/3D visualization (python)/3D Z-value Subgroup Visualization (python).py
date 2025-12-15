@@ -19,7 +19,7 @@ import plotly.graph_objects as go
 import matplotlib.colors as mcolors
 
 ###############################################################################
-# USER INPUT SECTION 
+# 0. USER INPUT SECTION 
 ###############################################################################
 
 file_path = "PATH/TO/YOUR/EXCEL_FILE.xlsx"   # path to input Excel file
@@ -42,17 +42,19 @@ ANTIBIOTIC_GROUP = {
     "pmb": "non_beta", "van": "non_beta",
 
     # A. baumannii (single antibiotics) — β-lactam
-    "caz": "beta", "azetreonam": "beta", "meropenem": "beta", "fdc": "beta",
+    "caz": "beta", "atm": "beta", "mem": "beta", "fdc": "beta",
 
     # A. baumannii (combination antibiotics)
     # No antibiotic-specific grouping is required.
     # All antibiotics share the same visualization config ("all").
 
     # PAO1 — Non β-lactam
-    "chir": "non_beta", "pf": "non_beta", "dox": "non_beta",
+    "amk_p": "non_beta", "gen_p": "non_beta", "tgc_p": "non_beta", "tet_p": "non_beta",
+    "rif_p": "non_beta", "lvx_p": "non_beta", "cip_p": "non_beta", "pmb_p": "non_beta",
+    "cst_p": "non_beta", "dox_p": "non_beta", "pf_p": "non_beta", "chir_p": "non_beta",
 
     # PAO1 — β-lactam
-    "caz_p": "beta", "azetreonam_p": "beta", "meropenem_p": "beta",
+    "caz_p": "beta", "atm_p": "beta", "mem_p": "beta",
 
     # S. aureus
     # No antibiotic-specific grouping is required.
@@ -397,4 +399,5 @@ def plot_3d_hts(file_path, strain, antibiotic):
 ###############################################################################
 if __name__ == "__main__":
     plot_3d_hts(file_path, strain, antibiotic)
+
 
