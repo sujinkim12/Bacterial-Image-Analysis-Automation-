@@ -18,7 +18,14 @@ import numpy as np
 import plotly.graph_objects as go
 import matplotlib.colors as mcolors
 
+###############################################################################
+# USER INPUT SECTION 
+###############################################################################
 
+file_path = "PATH/TO/YOUR/EXCEL_FILE.xlsx"   # path to input Excel file
+strain = "AB_single"                         # valid options: see CONFIG
+antibiotic = "amk"                           # valid options: see ANTIBIOTIC_GROUP
+               
 ###############################################################################
 # 1. ANTIBIOTIC GROUP MAPPING
 ###############################################################################
@@ -291,12 +298,87 @@ def plot_3d_hts(file_path, strain, antibiotic):
             opacity=0.8
         ))
 
+    # AVERAGE trajectory lines (IC50 → MIC, MIC → 9xMIC)
+    order = {"IC50": 0, "MIC": 1, "9xMIC": 2}
+    line_df = df_avg.copy()
+    line_df['order'] = line_df['shape_group'].map(order)
+    line_df = line_df.sort_values('order')
+
+    # IC50 → MIC
+    line_IC50_MIC = line_df[line_df['shape_group'].isin(['IC50', 'MIC'])]
+    if len(line_IC50_MIC) >= 2:
+        fig.add_trace(go.Scatter3d(
+            x=line_IC50_MIC['X'], y=line_IC50_MIC['Y'], z=line_IC50_MIC['Z'],
+            mode='lines',
+            line=dict(color='gray', width=4),
+            opacity=0.8,
+            showlegend=False
+        ))
+
+    # MIC → 9xMIC
+    point_MIC = line_df[line_df['shape_group'] == 'MIC']
+    point_9xMIC = line_df[line_df['shape_group'] == '9xMIC']
+    if len(point_MIC) > 0 and len(point_9xMIC) > 0:
+        fig.add_trace(go.Scatter3d(
+            x=[point_MIC['X'].values[0], point_9xMIC['X'].values[0]],
+            y=[point_MIC['Y'].values[0], point_9xMIC['Y'].values[0]],
+            z=[point_MIC['Z'].values[0], point_9xMIC['Z'].values[0]],
+            mode='lines+markers',
+            line=dict(color='gray', width=4),
+            marker=dict(size=3, color='gray'),
+            opacity=0.8,
+            showlegend=False
+        ))
+
+    # RAW data connections (IC50 ↔ MIC, MIC ↔ 9xMIC)
+    def connect_groups(group1_data, group2_data, color, opacity=0.2):
+        n = max(len(group1_data), len(group2_data))
+        if len(group1_data) < n:
+            group1_data = np.vstack([group1_data, np.tile(group1_data[-1], (n - len(group1_data), 1))])
+        if len(group2_data) < n:
+            group2_data = np.vstack([group2_data, np.tile(group2_data[-1], (n - len(group2_data), 1))])
+        
+        for i in range(n):
+            fig.add_trace(go.Scatter3d(
+                x=[group1_data[i, 0], group2_data[i, 0]],
+                y=[group1_data[i, 1], group2_data[i, 1]],
+                z=[group1_data[i, 2], group2_data[i, 2]],
+                mode='lines',
+                line=dict(color=color, width=2),
+                opacity=opacity,
+                showlegend=False
+            ))
+
+    groups = [df_all[df_all['shape_group'] == sg][['X value', 'Y value', 'Z value']].values 
+              for sg in ["IC50", "MIC", "9xMIC"]]
+    
+    if len(groups[0]) > 0 and len(groups[1]) > 0:
+        connect_groups(groups[0], groups[1], color='#CDC7BB', opacity=0.2)
+    if len(groups[1]) > 0 and len(groups[2]) > 0:
+        connect_groups(groups[1], groups[2], color='#727272', opacity=0.2)
+
     # Layout
     fig.update_layout(
+        showlegend=False,
         scene=dict(
-            xaxis=dict(range=[0, x_range], dtick=tick_xy, title="X"),
-            yaxis=dict(range=[0, x_range], dtick=tick_xy, title="Y"),
-            zaxis=dict(range=[0, z_range], dtick=tick_z, title="Z"),
+            xaxis=dict(
+                range=[0, x_range], 
+                dtick=tick_xy, 
+                title="X",
+                backgroundcolor="#E5ECF6"
+            ),
+            yaxis=dict(
+                range=[0, x_range], 
+                dtick=tick_xy, 
+                title="Y",
+                backgroundcolor="#e0e7f1"
+            ),
+            zaxis=dict(
+                range=[0, z_range], 
+                dtick=tick_z, 
+                title="Z",
+                backgroundcolor="#dbe2ec"
+            ),
             aspectmode="cube"
         ),
         width=1200,
@@ -308,3 +390,10 @@ def plot_3d_hts(file_path, strain, antibiotic):
     out_html = os.path.splitext(file_path)[0] + ".html"
     fig.write_html(out_html)
     print(f"Saved: {out_html}")
+
+
+###############################################################################
+# MAIN EXECUTION
+###############################################################################
+if __name__ == "__main__":
+    plot_3d_hts(file_path, strain, antibiotic)
