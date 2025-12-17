@@ -2,7 +2,7 @@
 # 2D Z-value Subgroup Visualization (R)
 # Author: Sujin Kim
 # Created: 2025-04-02
-# Last Modified: 2025-12-10
+# Last Modified: 2025-12-17
 # Description:
 #   - Works for ANY bacterial strain (A. baumannii, S. aureus, PAO1 …)
 #   - Loads multi-sheet HTS Excel data (IC50, MIC, 9xMIC)
@@ -99,7 +99,7 @@ z_group_config <- function(z_lim, actual_max, step) {
       range   = seq(0, z_lim, by = step),
       palette = c("grey", "grey", "#9D3CFF", "#00A0FF", "#009300",
                   "#E6DC32", "#F08228", "red"),
-      alpha   = c(0.2, 0.2, 0.3, 0.1, 0.2, 0.1, 0.4, 0.3)
+      alpha   = 0.2
     ),
     
     group2 = if (actual_max > z_lim) {
@@ -228,3 +228,4 @@ for (group in c("IC50", "MIC", "9xMIC")) {
     message("Error in ", group, ": ", e$message)
   })
 }
+
